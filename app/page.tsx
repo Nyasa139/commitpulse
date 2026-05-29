@@ -69,7 +69,6 @@ const Icons = {
 };
 
 export default function LandingPage() {
-  const [mounted, setMounted] = useState(false);
   const [username, setUsername] = useState('');
   const [copied, setCopied] = useState(false);
   const [svgContent, setSvgContent] = useState<string | null>(null);
@@ -79,11 +78,6 @@ export default function LandingPage() {
   const trimmedUsername = username.trim();
   const debouncedUsername = useDebounce(trimmedUsername, 500);
   const hasUsername = debouncedUsername.length > 0;
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true);
-  }, []);
 
   const badgeUrl = `/api/streak?user=${debouncedUsername}`;
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://commitpulse.vercel.app';

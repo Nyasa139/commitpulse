@@ -784,6 +784,40 @@ describe('GET /api/streak', () => {
       expect(body).toContain('COMMITS THIS MONTH');
     });
 
+    it('uses the selected year when generating archived monthly stats', async () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-05-20T12:00:00Z'));
+
+      vi.mocked(fetchGitHubContributions).mockResolvedValueOnce({
+        totalContributions: 25,
+        weeks: [
+          { contributionDays: [{ date: '2024-11-15', contributionCount: 10 }] },
+          { contributionDays: [{ date: '2024-12-15', contributionCount: 15 }] },
+        ],
+      } as ContributionCalendar);
+
+      try {
+        const response = await GET(
+          makeRequest({ user: 'octocat', view: 'monthly', year: '2024', delta_format: 'both' })
+        );
+
+        expect(response.status).toBe(200);
+        expect(fetchGitHubContributions).toHaveBeenCalledWith('octocat', {
+          bypassCache: false,
+          from: '2024-01-01T00:00:00Z',
+          to: '2024-12-31T23:59:59Z',
+        });
+
+        const body = await response.text();
+        expect(body).toContain('DECEMBER');
+        expect(body).toContain('class="stats">15</text>');
+        expect(body).toContain('+50% (+5)');
+        expect(body).not.toContain('MAY');
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
     it('uses valid custom width and height in monthly SVG output', async () => {
       const response = await GET(
         makeRequest({ user: 'octocat', view: 'monthly', width: '400', height: '200' })

@@ -26,6 +26,17 @@ export class ValidationError extends Error {
   }
 }
 
+function getMonthlyReferenceDate(year: string | undefined, timezone: string): Date | undefined {
+  if (!year) return undefined;
+
+  const selectedYear = Number(year);
+  const currentYear = Number(
+    new Intl.DateTimeFormat('en-CA', { timeZone: timezone, year: 'numeric' }).format(new Date())
+  );
+
+  return selectedYear < currentYear ? new Date(`${year}-12-15T12:00:00Z`) : undefined;
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
 
@@ -185,7 +196,11 @@ export async function GET(request: Request) {
 
     let svg = '';
     if (view === 'monthly') {
-      const stats = calculateMonthlyStats(calendar, timezone);
+      const stats = calculateMonthlyStats(
+        calendar,
+        timezone,
+        getMonthlyReferenceDate(year, timezone)
+      );
       svg = generateMonthlySVG(stats, params);
     } else if (versus && versusCalendar) {
       const stats1 = calculateStreak(calendar, timezone, undefined, grace);
