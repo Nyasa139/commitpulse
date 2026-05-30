@@ -456,6 +456,27 @@ describe('fetchUserRepos', () => {
     expect(result[0].stargazers_count).toBe(1);
   });
 
+  it('returns a full three-repo payload with the expected star counts and languages', async () => {
+    const mockedRepos = [
+      { stargazers_count: 7, language: 'TypeScript' },
+      { stargazers_count: 42, language: 'Rust' },
+      { stargazers_count: 128, language: 'JavaScript' },
+    ];
+
+    vi.mocked(fetch).mockResolvedValue(mockResponse(mockedRepos));
+
+    const result = await fetchUserRepos('octocat', { bypassCache: true });
+
+    expect(result).toHaveLength(3);
+    result.forEach((repo, index) => {
+      expect(repo).toHaveProperty('stargazers_count');
+      expect(repo).toHaveProperty('language');
+      expect(repo.stargazers_count).toBe(mockedRepos[index].stargazers_count);
+      expect(repo.language).toBe(mockedRepos[index].language);
+    });
+    expect(result).toEqual(mockedRepos);
+  });
+
   it('encodes the username before using it in the REST repos path', async () => {
     vi.mocked(fetch).mockResolvedValue(
       mockResponse([{ stargazers_count: 1, language: 'TypeScript' }])
