@@ -90,10 +90,8 @@ export async function GET(request: Request) {
       scale: 'linear',
     };
 
-    
     // Fetch the wrapped stats for the year (calendar is included to avoid a duplicate API call)
     const wrappedStats = await getWrappedData(user, year, { bypassCache: refresh });
-    
 
     const svg = generateWrappedSVG(wrappedStats, params, year, wrappedStats.calendar);
 
