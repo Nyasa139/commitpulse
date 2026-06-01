@@ -1596,6 +1596,9 @@ describe('SVG Structural Validity and Cleanliness', () => {
     expect(titleCount).toBe(1);
     const styleImportCount = (svg.match(/@import url/g) || []).length;
     expect(styleImportCount).toBe(1);
+  });
+});
+
 describe('buildTowerPaths', () => {
   it('returns correct paths for scale 1', () => {
     const paths = buildTowerPaths(15, 1);
