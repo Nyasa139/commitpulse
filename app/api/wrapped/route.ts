@@ -93,9 +93,9 @@ export async function GET(request: Request) {
     
     // Fetch the wrapped stats for the year (calendar is included to avoid a duplicate API call)
     const wrappedStats = await getWrappedData(user, year, { bypassCache: refresh });
-    const { calendar, ...statsOnly } = wrappedStats;
+    
 
-    const svg = generateWrappedSVG(statsOnly, params, year, calendar);
+    const svg = generateWrappedSVG(wrappedStats, params, year, wrappedStats.calendar);
 
     // Cache-Control: Annual wrapped stats are stable, cache for 24 hours.
     // Clients can bust with ?refresh=true.
