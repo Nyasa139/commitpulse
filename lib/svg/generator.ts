@@ -491,6 +491,27 @@ function renderTowers(
   return towers;
 }
 
+function renderRadarScan(
+  speed: string,
+  sf: number,
+  accentColor: string,
+  autoTheme: boolean
+): string {
+  const s = createScaler(sf);
+  const fillAttr = autoTheme
+    ? 'class="cp-accent-fill scan-line"'
+    : `fill="${accentColor}" class="cp-accent-fill scan-line"`;
+  return `<rect
+    x="${s(100)}"
+    y="${s(80)}"
+    width="${s(400)}"
+    height="${s(1)}"
+    ${fillAttr}
+    fill-opacity="0.3"
+    style="--scan-speed: ${speed}; --scan-start: ${s(0)}px; --scan-end: ${s(240)}px;"
+  />`;
+}
+
 function renderFooter(
   stats: StreakStats,
   params: BadgeParams,
@@ -503,15 +524,7 @@ function renderFooter(
   return `
   ${!params.hide_stats ? renderStatsSection(stats, labels, s, params) : ''}
   ${!params.hide_title ? `<text x="${s(300)}" y="${s(50)}" text-anchor="middle" class="title">${truncateUsername(safeUser).toUpperCase()}</text>` : ''}
-  <rect
-    x="${s(100)}"
-    y="${s(80)}"
-    width="${s(400)}"
-    height="${s(1)}"
-    class="cp-accent-fill scan-line"
-    fill-opacity="0.3"
-    style="--scan-speed: ${params.speed || '8s'}; --scan-start: ${s(0)}px; --scan-end: ${s(240)}px;"
-  />`;
+  ${renderRadarScan(params.speed || '8s', sf, accent, false)}`;
 }
 
 const MONTH_NAMES = [
@@ -644,6 +657,9 @@ export function generateSVG(
     computeTowers(calendar, params.scale, stats.todayDate, params.mode),
     sf
   );
+  if (params.gradient) {
+    generateCustomGradients(params);
+  }
   const towers = renderTowers(
     towerData,
     params,
@@ -765,22 +781,7 @@ ${
     ? `<text x="${s(300)}" y="${s(50)}" text-anchor="middle" class="title">${truncateUsername(safeUser).toUpperCase()}</text>`
     : ''
 }
-
-  ${
-    animate
-      ? `
-    <rect
-      x="${s(100)}"
-      y="${s(80)}"
-      width="${s(400)}"
-      height="${s(1)}"
-      class="cp-accent-fill scan-line"
-      fill-opacity="0.3"
-      style="--scan-speed: ${params.speed || '8s'}; --scan-start: ${s(0)}px; --scan-end: ${s(240)}px;"
-    />
-    `
-      : ''
-  }
+${renderRadarScan(params.speed || '8s', sf, '', true)}
 </svg>
 `;
 }
