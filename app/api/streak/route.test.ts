@@ -163,6 +163,24 @@ describe('GET /api/streak', () => {
       expect(fetchGitHubContributions).not.toHaveBeenCalled();
     });
 
+    it('returns 400 when grace is below the minimum value', async () => {
+      const response = await GET(
+        makeRequest({
+          user: 'octocat',
+          grace: '-1',
+        })
+      );
+
+      expect(response.status).toBe(400);
+
+      const body = await response.json();
+
+      expect(body.error).toBe('Invalid parameters');
+      expect(body.details.fieldErrors.grace[0]).toBe('grace must be an integer between 0 and 7');
+
+      expect(fetchGitHubContributions).not.toHaveBeenCalled();
+    });
+
     it('should return 200 OK and valid SVG when the optional repo query parameter is provided', async () => {
       // 1. Make request with both parameters present
       const response = await GET(makeRequest({ user: 'octocat', repo: 'commitpulse' }));
@@ -246,7 +264,7 @@ describe('GET /api/streak', () => {
       expect(fetchGitHubContributions).toHaveBeenCalled();
     });
 
-    it('returns valid SVG when grace exceeds max value', async () => {
+    it('returns 400 when grace exceeds max value', async () => {
       const response = await GET(
         makeRequest({
           user: 'octocat',
@@ -254,10 +272,7 @@ describe('GET /api/streak', () => {
         })
       );
 
-      expect(response.status).toBe(200);
-
-      const body = await response.text();
-      expect(body).toContain('<svg');
+      expect(response.status).toBe(400);
     });
 
     it('embeds the username (uppercased) in the SVG title', async () => {
