@@ -67,8 +67,20 @@ export function getClientIp(
       }
 
       // If all proxies are trusted via wildcard
+      // Wildcard should NOT bypass IP validation
+      // It only disables proxy filtering, not header trust
+
       if (config.trustedProxies.includes('*')) {
-        return ips[0];
+        // Still choose safest option: rightmost IP (origin-most-remote)
+        const lastIp = ips[ips.length - 1];
+
+        logSecurityEvent('WILDCARD_TRUST_USED', {
+          resolvedIp: lastIp,
+          chain: ips,
+          header: 'x-forwarded-for',
+        });
+
+        return lastIp;
       }
 
       // Traverse from right to left (most recent to oldest proxy hop)
