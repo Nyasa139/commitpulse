@@ -27,8 +27,8 @@ import ProfileOptimizerModal from './ProfileOptimizerModal';
 import ResumeProfileSection from './ResumeProfileSection';
 import RepositoryUsageComparison from './RepositoryUsageComparison';
 import type { DashboardPeriod } from '@/utils/dashboardPeriod';
+
 import { PopularRepos } from './PopularPinnnedRepos';
-import { PopularRepos } from './PopularRepos';
 import { useShareActions } from '@/hooks/useShareActions';
 
 // Define the dashboard data structure
@@ -610,22 +610,30 @@ export default function DashboardClient({
           )}
 
           <RefreshButton username={username} />
-          
+
           <button
             onClick={handleDownloadPNG}
             disabled={states.png === 'loading'}
             className="flex items-center gap-2 rounded-xl border border-black/10 px-4 py-2 text-sm font-semibold hover:bg-gray-100 dark:hover:bg-zinc-800 transition disabled:opacity-50 dark:border-[rgba(255,255,255,0.15)] text-gray-900 dark:text-white"
           >
-            {states.png === 'loading' ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+            {states.png === 'loading' ? (
+              <Loader2 size={16} className="animate-spin" />
+            ) : (
+              <Download size={16} />
+            )}
             Download PNG
           </button>
-          
+
           <button
             onClick={handleCopyImage}
             disabled={states.copyImage === 'loading'}
             className="flex items-center gap-2 rounded-xl border border-black/10 px-4 py-2 text-sm font-semibold hover:bg-gray-100 dark:hover:bg-zinc-800 transition disabled:opacity-50 dark:border-[rgba(255,255,255,0.15)] text-gray-900 dark:text-white"
           >
-            {states.copyImage === 'loading' ? <Loader2 size={16} className="animate-spin" /> : <Copy size={16} />}
+            {states.copyImage === 'loading' ? (
+              <Loader2 size={16} className="animate-spin" />
+            ) : (
+              <Copy size={16} />
+            )}
             Copy Image
           </button>
 
@@ -690,7 +698,7 @@ export default function DashboardClient({
                 period={period}
               />
             </section>
-            
+
             <section>
               <RepositoryUsageComparison repos={initialData.categorizedRepos} />
             </section>
@@ -845,16 +853,27 @@ export default function DashboardClient({
               />
               <ComparisonStatsCard
                 title="Highly Active Repos"
-                valueA={initialData.categorizedRepos?.filter(r => r.usageCategory === 'Highly active').length || 0}
-                valueB={secondUserData.categorizedRepos?.filter(r => r.usageCategory === 'Highly active').length || 0}
+                valueA={
+                  initialData.categorizedRepos?.filter((r) => r.usageCategory === 'Highly active')
+                    .length || 0
+                }
+                valueB={
+                  secondUserData.categorizedRepos?.filter(
+                    (r) => r.usageCategory === 'Highly active'
+                  ).length || 0
+                }
                 labelA={initialData.profile.name}
                 labelB={secondUserData.profile.name}
                 icon="Activity"
               />
               <ComparisonStatsCard
                 title="Total Repo Score"
-                valueA={initialData.categorizedRepos?.reduce((sum, r) => sum + r.activityScore, 0) || 0}
-                valueB={secondUserData.categorizedRepos?.reduce((sum, r) => sum + r.activityScore, 0) || 0}
+                valueA={
+                  initialData.categorizedRepos?.reduce((sum, r) => sum + r.activityScore, 0) || 0
+                }
+                valueB={
+                  secondUserData.categorizedRepos?.reduce((sum, r) => sum + r.activityScore, 0) || 0
+                }
                 labelA={initialData.profile.name}
                 labelB={secondUserData.profile.name}
                 icon="Trophy"

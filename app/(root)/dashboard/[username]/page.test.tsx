@@ -106,6 +106,7 @@ describe('DashboardPage', () => {
     lastSyncedAt: undefined,
     popularRepos: [],
     pinnedRepos: [],
+    categorizedRepos: [],
   };
 
   beforeEach(() => {
