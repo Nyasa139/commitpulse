@@ -104,7 +104,11 @@ export interface Repository {
   } | null;
 }
 
-export type UsageCategory = 'Highly active' | 'Moderately active' | 'Low-activity' | 'Possibly unused/test';
+export type UsageCategory =
+  | 'Highly active'
+  | 'Moderately active'
+  | 'Low-activity'
+  | 'Possibly unused/test';
 
 export interface RepositoryUsage extends Repository {
   commitsCount: number;
