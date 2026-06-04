@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
@@ -44,6 +45,10 @@ import {
   Share2,
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
+  Activity,
+} from 'lucide-react';
+import type { RepositoryUsage } from '@/types/dashboard';
+import RepositoryUsageComparison from '@/components/dashboard/RepositoryUsageComparison';
 
 /* ── types ────────────────────────────────────────────────────────────── */
 
@@ -92,6 +97,7 @@ export interface CompareUserData {
   stats: UserStats;
   languages: LanguageData[];
   activity: ActivityData[];
+  categorizedRepos?: RepositoryUsage[];
 }
 
 export interface CompareResponse {
@@ -1128,6 +1134,154 @@ export default function CompareClient() {
                 <div className="relative z-10 space-y-8">
                   {/* Winner Banner */}
                   {winner && (
+                <CompareProfileCard profile={d2.profile} stats={d2.stats} side="right" />
+              </div>
+
+              {/* Stats Battle Grid */}
+              <div>
+                <h2 className="text-xs text-[#A1A1AA] uppercase tracking-widest font-medium mb-4">
+                  Stats Showdown
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <StatBattle
+                    label="Current Streak"
+                    icon={Flame}
+                    valueA={d1.stats.currentStreak}
+                    valueB={d2.stats.currentStreak}
+                  />
+                  <StatBattle
+                    label="Peak Streak"
+                    icon={TrendingUp}
+                    valueA={d1.stats.peakStreak}
+                    valueB={d2.stats.peakStreak}
+                  />
+                  <StatBattle
+                    label="Total Contributions"
+                    icon={GitCommit}
+                    valueA={d1.stats.totalContributions}
+                    valueB={d2.stats.totalContributions}
+                  />
+                  <StatBattle
+                    label="Repositories"
+                    icon={GitBranch}
+                    valueA={d1.profile.stats.repositories}
+                    valueB={d2.profile.stats.repositories}
+                  />
+                  <StatBattle
+                    label="Stars"
+                    icon={Star}
+                    valueA={d1.profile.stats.stars}
+                    valueB={d2.profile.stats.stars}
+                  />
+                  <StatBattle
+                    label="Followers"
+                    icon={Users}
+                    valueA={d1.profile.stats.followers}
+                    valueB={d2.profile.stats.followers}
+                  />
+                  <StatBattle
+                    label="Pull Requests"
+                    icon={GitPullRequest}
+                    valueA={d1.stats.totalPRs || 0}
+                    valueB={d2.stats.totalPRs || 0}
+                  />
+                  <StatBattle
+                    label="Issues"
+                    icon={CircleDot}
+                    valueA={d1.stats.totalIssues || 0}
+                    valueB={d2.stats.totalIssues || 0}
+                  />
+                  <StatBattle
+                    label="Highly Active Repos"
+                    icon={Activity}
+                    valueA={d1.categorizedRepos?.filter(r => r.usageCategory === 'Highly active').length || 0}
+                    valueB={d2.categorizedRepos?.filter(r => r.usageCategory === 'Highly active').length || 0}
+                  />
+                  <StatBattle
+                    label="Total Repo Score"
+                    icon={Trophy}
+                    valueA={d1.categorizedRepos?.reduce((sum, r) => sum + r.activityScore, 0) || 0}
+                    valueB={d2.categorizedRepos?.reduce((sum, r) => sum + r.activityScore, 0) || 0}
+                  />
+                </div>
+              </div>
+
+              {/* Coding Habits Showdown */}
+              <CodingHabitShowdown user1={d1} user2={d2} />
+
+              {/* Code Volume Showdown */}
+              <CodeVolumeShowdown user1={d1} user2={d2} />
+
+              {/* Developer Skills Radar */}
+              <DeveloperSkillsRadar user1={d1} user2={d2} />
+
+              {/* Language Comparison */}
+              <LanguageComparison
+                langsA={d1.languages}
+                langsB={d2.languages}
+                nameA={d1.profile.username}
+                nameB={d2.profile.username}
+              />
+
+              {/* Activity Heatmaps */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {[
+                  { user: d1, side: 'left' as const },
+                  { user: d2, side: 'right' as const },
+                ].map(({ user, side }) => (
+                  <motion.div
+                    key={side}
+                    initial={{ opacity: 0, y: 12 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="p-5 rounded-xl bg-white dark:bg-[#0a0a0a] border border-black/10 dark:border-[rgba(255,255,255,0.08)]"
+                  >
+                    <h3 className="text-xs text-[#A1A1AA] uppercase tracking-widest font-medium mb-3">
+                      {user.profile.username}&apos;s Activity (Last 13 Weeks)
+                    </h3>
+                    <MiniHeatmap activity={user.activity} />
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Repository Usage Comparison */}
+              <div>
+                <h2 className="text-xs text-[#A1A1AA] uppercase tracking-widest font-medium mb-4">
+                  Repository Usage Comparison
+                </h2>
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                  <motion.div
+                    initial={{ opacity: 0, y: 12 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="p-5 rounded-xl bg-white dark:bg-[#0a0a0a] border border-black/10 dark:border-[rgba(255,255,255,0.08)]"
+                  >
+                    <h3 className="text-xs text-[#A1A1AA] uppercase tracking-widest font-medium mb-3">
+                      @{d1.profile.username}&apos;s Repositories
+                    </h3>
+                    <RepositoryUsageComparison repos={d1.categorizedRepos} />
+                  </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0, y: 12 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="p-5 rounded-xl bg-white dark:bg-[#0a0a0a] border border-black/10 dark:border-[rgba(255,255,255,0.08)]"
+                  >
+                    <h3 className="text-xs text-[#A1A1AA] uppercase tracking-widest font-medium mb-3">
+                      @{d2.profile.username}&apos;s Repositories
+                    </h3>
+                    <RepositoryUsageComparison repos={d2.categorizedRepos} />
+                  </motion.div>
+                </div>
+              </div>
+
+              {/* 3D Monolith Embeds */}
+              <div>
+                <h2 className="text-xs text-[#A1A1AA] uppercase tracking-widest font-medium mb-4">
+                  3D Monolith Comparison
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {[d1, d2].map((user) => (
                     <motion.div
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}

@@ -103,3 +103,14 @@ export interface Repository {
     color: string;
   } | null;
 }
+
+export type UsageCategory = 'Highly active' | 'Moderately active' | 'Low-activity' | 'Possibly unused/test';
+
+export interface RepositoryUsage extends Repository {
+  commitsCount: number;
+  size: number;
+  openIssues: number;
+  updatedAt: string;
+  activityScore: number;
+  usageCategory: UsageCategory;
+}

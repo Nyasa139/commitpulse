@@ -87,6 +87,7 @@ export interface ContributionCalendar {
  */
 export interface RepoContribution {
   repository: {
+    name: string;
     primaryLanguage: { name: string } | null;
   };
   contributions: { totalCount: number };

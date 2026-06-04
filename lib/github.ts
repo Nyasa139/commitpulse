@@ -12,6 +12,7 @@ import { DistributedCache } from '@/lib/cache';
 import { LANGUAGE_COLORS } from '@/lib/svg/languageColors';
 import { CONTRIBUTION_MILESTONES, STREAK_MILESTONES } from './svg/constants';
 import { quotaMonitor } from '@/services/github/quota-monitor';
+import { categorizeRepositories } from '@/utils/repositoryScoring';
 
 interface GitHubRepo {
   name: string;
@@ -20,6 +21,8 @@ interface GitHubRepo {
   fork?: boolean;
   forks_count?: number;
   updated_at?: string;
+  size?: number;
+  open_issues_count?: number;
   owner?: { login: string };
 }
 
@@ -381,6 +384,8 @@ function sanitizeRepo(repo: GitHubRepo): GitHubRepo {
     fork: repo.fork,
     forks_count: repo.forks_count,
     updated_at: repo.updated_at,
+    size: repo.size,
+    open_issues_count: repo.open_issues_count,
   };
 }
 
@@ -593,6 +598,7 @@ async function fetchContributionsUncached(
             }
             commitContributionsByRepository(maxRepositories: 100) {
               repository {
+                name
                 primaryLanguage {
                   name
                 }
@@ -1490,6 +1496,7 @@ export async function getFullDashboardData(username: string, options: FetchOptio
     commitClock,
     popularRepos,
     pinnedRepos,
+    categorizedRepos: categorizeRepositories(username, reposData, repoContributions),
     graphData: { nodes, links },
     lastSyncedAt: calendarData.lastSyncedAt,
   };

@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { X, RefreshCw, Share2 } from 'lucide-react';
+import { X, RefreshCw, Share2, Download, Copy, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import type { Achievement, Repository } from '@/types/dashboard';
+import type { Achievement, Repository, RepositoryUsage } from '@/types/dashboard';
 import type { GraphNode, GraphLink } from '@/types';
 
 import RefreshButton from './RefreshButton';
@@ -25,8 +25,11 @@ import GrowthTrendChart from './GrowthTrendChart';
 import { useRouter } from 'next/navigation';
 import ProfileOptimizerModal from './ProfileOptimizerModal';
 import ResumeProfileSection from './ResumeProfileSection';
+import RepositoryUsageComparison from './RepositoryUsageComparison';
 import type { DashboardPeriod } from '@/utils/dashboardPeriod';
 import { PopularRepos } from './PopularPinnnedRepos';
+import { PopularRepos } from './PopularRepos';
+import { useShareActions } from '@/hooks/useShareActions';
 
 // Define the dashboard data structure
 interface DashboardData {
@@ -77,6 +80,7 @@ interface DashboardData {
   };
   popularRepos?: Repository[];
   pinnedRepos?: Repository[];
+  categorizedRepos?: RepositoryUsage[];
 }
 
 interface DashboardClientProps {
@@ -474,6 +478,16 @@ export default function DashboardClient({
     }
   };
 
+  const { handleDownloadPNG, handleCopyImage, states } = useShareActions(
+    username,
+    {
+      stats: initialData.stats,
+      languages: initialData.languages,
+      activity: initialData.activity,
+    },
+    () => {}
+  );
+
   const coderProfileA = generateCoderProfile({
     currentStreak: initialData.stats.currentStreak,
     commitClock: initialData.commitClock,
@@ -596,9 +610,28 @@ export default function DashboardClient({
           )}
 
           <RefreshButton username={username} />
+          
+          <button
+            onClick={handleDownloadPNG}
+            disabled={states.png === 'loading'}
+            className="flex items-center gap-2 rounded-xl border border-black/10 px-4 py-2 text-sm font-semibold hover:bg-gray-100 dark:hover:bg-zinc-800 transition disabled:opacity-50 dark:border-[rgba(255,255,255,0.15)] text-gray-900 dark:text-white"
+          >
+            {states.png === 'loading' ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+            Download PNG
+          </button>
+          
+          <button
+            onClick={handleCopyImage}
+            disabled={states.copyImage === 'loading'}
+            className="flex items-center gap-2 rounded-xl border border-black/10 px-4 py-2 text-sm font-semibold hover:bg-gray-100 dark:hover:bg-zinc-800 transition disabled:opacity-50 dark:border-[rgba(255,255,255,0.15)] text-gray-900 dark:text-white"
+          >
+            {states.copyImage === 'loading' ? <Loader2 size={16} className="animate-spin" /> : <Copy size={16} />}
+            Copy Image
+          </button>
+
           <button
             onClick={handleShareDashboard}
-            className="flex items-center gap-2 rounded-xl border border-black/10 px-4 py-2 text-sm font-semibold hover:bg-gray-100 dark:hover:bg-zinc-800 transition"
+            className="flex items-center gap-2 rounded-xl border border-black/10 px-4 py-2 text-sm font-semibold hover:bg-gray-100 dark:hover:bg-zinc-800 transition dark:border-[rgba(255,255,255,0.15)] text-gray-900 dark:text-white"
           >
             <Share2 size={16} />
             Share
@@ -656,6 +689,10 @@ export default function DashboardClient({
                 username={username}
                 period={period}
               />
+            </section>
+            
+            <section>
+              <RepositoryUsageComparison repos={initialData.categorizedRepos} />
             </section>
           </div>
 
@@ -805,6 +842,22 @@ export default function DashboardClient({
                 labelA={initialData.profile.name}
                 labelB={secondUserData.profile.name}
                 icon="UserPlus"
+              />
+              <ComparisonStatsCard
+                title="Highly Active Repos"
+                valueA={initialData.categorizedRepos?.filter(r => r.usageCategory === 'Highly active').length || 0}
+                valueB={secondUserData.categorizedRepos?.filter(r => r.usageCategory === 'Highly active').length || 0}
+                labelA={initialData.profile.name}
+                labelB={secondUserData.profile.name}
+                icon="Activity"
+              />
+              <ComparisonStatsCard
+                title="Total Repo Score"
+                valueA={initialData.categorizedRepos?.reduce((sum, r) => sum + r.activityScore, 0) || 0}
+                valueB={secondUserData.categorizedRepos?.reduce((sum, r) => sum + r.activityScore, 0) || 0}
+                labelA={initialData.profile.name}
+                labelB={secondUserData.profile.name}
+                icon="Trophy"
               />
             </div>
           </div>
@@ -1058,6 +1111,28 @@ export default function DashboardClient({
                   {secondUserData.profile.name}&apos;s Heatmap
                 </p>
                 <Heatmap data={secondUserData.activity} />
+              </div>
+            </div>
+          </div>
+
+          <div className="p-6 rounded-xl bg-white dark:bg-[#0a0a0a] border border-black/10 dark:border-[rgba(255,255,255,0.08)] flex flex-col gap-6">
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-widest">
+                Repository Usage Comparison
+              </h3>
+            </div>
+            <div className="flex flex-col xl:flex-row gap-8">
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-[#A1A1AA] mb-3 font-semibold text-center xl:text-left">
+                  {initialData.profile.name}&apos;s Repositories
+                </p>
+                <RepositoryUsageComparison repos={initialData.categorizedRepos} />
+              </div>
+              <div className="flex-1 min-w-0 xl:border-l xl:border-t-0 border-t border-black/10 dark:border-white/5 pt-8 xl:pt-0 xl:pl-8">
+                <p className="text-xs text-[#A1A1AA] mb-3 font-semibold text-center xl:text-left">
+                  {secondUserData.profile.name}&apos;s Repositories
+                </p>
+                <RepositoryUsageComparison repos={secondUserData.categorizedRepos} />
               </div>
             </div>
           </div>
