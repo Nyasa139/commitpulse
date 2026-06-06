@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useSyncExternalStore } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, RefreshCw, Share2, Download, Copy, Loader2 } from 'lucide-react';
+
 import Link from 'next/link';
 import { toast } from 'sonner';
 import type { Achievement, Repository, RepositoryUsage } from '@/types/dashboard';
